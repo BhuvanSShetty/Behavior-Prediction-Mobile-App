@@ -1,6 +1,7 @@
 package com.gamemonitorappnew
 
 import android.app.usage.UsageStatsManager
+import android.app.usage.UsageEvents
 import android.app.AppOpsManager
 import android.provider.Settings
 import android.content.Context
@@ -73,30 +74,30 @@ class UsageStatsModule(reactContext: ReactApplicationContext) : ReactContextBase
             val usageStatsManager = reactApplicationContext.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
             val time = System.currentTimeMillis()
             
-            // Look at the last 10 seconds of usage
-            val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 10, time)
-            
-            if (stats != null && stats.isNotEmpty()) {
-                var latestStats = stats[0]
-                for (usageStat in stats) {
-                    if (usageStat.lastTimeUsed > latestStats.lastTimeUsed) {
-                        latestStats = usageStat
-                    }
+            // 🚀 Switch to UsageEvents for precision
+            val events = usageStatsManager.queryEvents(time - 1000 * 20, time) // check last 20 sec
+            val event = UsageEvents.Event()
+            var lastPkg: String? = null
+
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event)
+                if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                    lastPkg = event.packageName
                 }
-                
-                val pkg = latestStats.packageName
+            }
+            
+            if (lastPkg != null) {
                 val map = Arguments.createMap()
-                map.putString("packageName", pkg)
+                map.putString("packageName", lastPkg)
                 
                 // 🕵️ Game detection logic
                 var isGame = false
                 try {
                     val pm = reactApplicationContext.packageManager
-                    val info = pm.getApplicationInfo(pkg, 0)
+                    val info = pm.getApplicationInfo(lastPkg, 0)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         isGame = (info.category == ApplicationInfo.CATEGORY_GAME)
                     } else {
-                        // Older Android versions used a flag
                         isGame = (info.flags and ApplicationInfo.FLAG_IS_GAME) != 0
                     }
                 } catch (e: Exception) {
@@ -106,7 +107,18 @@ class UsageStatsModule(reactContext: ReactApplicationContext) : ReactContextBase
                 map.putBoolean("isGame", isGame)
                 promise.resolve(map)
             } else {
-                promise.resolve(null)
+                // Fallback to UsageStats if events log is empty
+                val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 10, time)
+                if (stats != null && stats.isNotEmpty()) {
+                    var latest = stats[0]
+                    for (s in stats) { if (s.lastTimeUsed > latest.lastTimeUsed) latest = s }
+                    val map = Arguments.createMap()
+                    map.putString("packageName", latest.packageName)
+                    map.putBoolean("isGame", false) // basic fallback
+                    promise.resolve(map)
+                } else {
+                    promise.resolve(null)
+                }
             }
         } catch (e: Exception) {
             promise.reject("ERROR_GETTING_USAGE", e.message)
