@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   StatusBar,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { register } from "../services/authService";
@@ -66,9 +67,10 @@ export default function RegisterScreen({ navigation }) {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View style={s.container}>
-          
-          {/* Header */}
+        <ScrollView contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          <View style={s.container}>
+            
+            {/* Header */}
           <View style={s.headerRow}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
               <Text style={s.backText}>← Back</Text>
@@ -210,6 +212,7 @@ export default function RegisterScreen({ navigation }) {
             </View>
           </View>
         </View>
+      </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -218,16 +221,23 @@ export default function RegisterScreen({ navigation }) {
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
 
+  scrollContent: {
+    flexGrow: 1,
+    paddingTop: S.xl,
+    paddingBottom: 40,
+  },
+
   container: {
     flex: 1,
     paddingHorizontal: S.lg,
-    paddingBottom: S.xl,
     justifyContent: "center",
   },
 
   headerRow: {
-    marginBottom: S.xl,
+    marginBottom: S.lg,
     alignItems: "flex-start",
+    zIndex: 50,
+    elevation: 50,
   },
   backBtn: {
     paddingVertical: S.sm,
