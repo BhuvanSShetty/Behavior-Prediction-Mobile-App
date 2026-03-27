@@ -9,6 +9,7 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   ScrollView,
+  Platform,
 } from "react-native";
 import { login } from "../services/authService";
 import { C, S, R } from "../utils/theme";
@@ -41,7 +42,10 @@ export default function LoginScreen({ navigation }) {
   return (
     <View style={s.root}>
       <StatusBar barStyle="light-content" backgroundColor={C.bg} />
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }} 
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         <ScrollView
           contentContainerStyle={s.scroll}
           keyboardShouldPersistTaps="handled"
@@ -124,8 +128,8 @@ const s = StyleSheet.create({
   scroll: {
     flexGrow: 1,
     paddingHorizontal: S.lg,
-    paddingBottom: S.xl,
-    justifyContent: "center",
+    paddingTop: S.xxl,
+    paddingBottom: 40,
   },
 
   // Brand
