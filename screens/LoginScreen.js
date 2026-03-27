@@ -52,16 +52,17 @@ export default function LoginScreen({ navigation }) {
             <View style={s.logoMark}>
               <View style={s.logoInner} />
             </View>
-            <Text style={s.appName}>GameMonitor</Text>
-            <Text style={s.tagline}>Behavioural tracking for responsible gaming</Text>
+            <Text style={s.appName}>BehaveTrack</Text>
+            <Text style={s.tagline}>Behavior Detection System</Text>
           </View>
 
           {/* ── Card ──────────────────────────────────────────────────── */}
-          <View style={s.card}>
-            <Text style={s.cardTitle}>Sign in</Text>
-            <Text style={s.cardSub}>Enter your credentials to continue</Text>
+          <View style={s.cardWrapper}>
+            <View style={s.card}>
+              <Text style={s.cardTitle}>Sign in</Text>
+              <Text style={s.cardSub}>Enter your credentials to continue</Text>
 
-            <View style={s.form}>
+              <View style={s.form}>
               <View style={s.fieldWrap}>
                 <Text style={s.fieldLabel}>Email address</Text>
                 <TextInput
@@ -102,6 +103,7 @@ export default function LoginScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           </View>
+        </View>
 
           {/* ── Footer ────────────────────────────────────────────────── */}
           <View style={s.footer}>
@@ -127,77 +129,94 @@ const s = StyleSheet.create({
   },
 
   // Brand
-  brandWrap: { alignItems: "center", marginBottom: S.xl, paddingTop: 60 },
+  brandWrap: { alignItems: "center", marginBottom: S.xl, paddingTop: 40 },
   logoMark: {
     width: 48,
     height: 48,
-    borderRadius: R.md,
-    backgroundColor: C.accent,
+    borderRadius: R.lg,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: S.md,
+    shadowColor: "#000",
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 5,
   },
   logoInner: {
     width: 20,
     height: 20,
-    borderRadius: 4,
-    backgroundColor: C.bg,
-    opacity: 0.6,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: C.accent,
   },
   appName: {
-    fontSize: 22,
-    fontWeight: "700",
+    fontSize: 28,
+    fontWeight: "800",
     color: C.textPrimary,
-    letterSpacing: 0.3,
-    marginBottom: 6,
+    letterSpacing: -0.5,
+    marginBottom: 4,
   },
   tagline: {
-    fontSize: 13,
+    fontSize: 14,
     color: C.textSecondary,
-    textAlign: "center",
-    letterSpacing: 0.2,
+    fontWeight: "500",
+    letterSpacing: 0.3,
   },
 
   // Card
+  cardWrapper: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.8,
+    shadowRadius: 40,
+    elevation: 20,
+  },
   card: {
     backgroundColor: C.card,
     borderRadius: R.xl,
     borderWidth: 1,
     borderColor: C.border,
-    padding: S.lg,
+    padding: S.xl,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
     color: C.textPrimary,
-    marginBottom: 4,
+    marginBottom: 6,
+    letterSpacing: -0.5,
   },
   cardSub: {
-    fontSize: 13,
+    fontSize: 14,
     color: C.textSecondary,
-    marginBottom: S.lg,
+    marginBottom: S.lg + S.sm,
   },
 
   // Form
   form:      { gap: S.md },
-  fieldWrap: { gap: 6 },
+  fieldWrap: { gap: 8 },
   fieldLabel: {
-    fontSize: 13,
-    fontWeight: "500",
+    fontSize: 12,
+    fontWeight: "600",
     color: C.textSecondary,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   input: {
     backgroundColor: C.input,
     color: C.textPrimary,
     paddingHorizontal: S.md,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: R.md,
     borderWidth: 1,
     borderColor: C.border,
     fontSize: 15,
   },
   inputFocused: {
-    borderColor: C.accent,
+    borderColor: C.borderFocus,
+    backgroundColor: "rgba(255,255,255,0.08)",
   },
   btn: {
     backgroundColor: C.accent,

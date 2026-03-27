@@ -29,9 +29,9 @@ const StatCard = ({ label, value, color }) => (
   </View>
 );
 const sc = StyleSheet.create({
-  wrap:  { flex: 1, backgroundColor: C.elevated, borderRadius: R.md, padding: S.sm, alignItems: "center", borderWidth: 1, borderColor: C.border },
-  val:   { fontSize: 20, fontWeight: "700" },
-  label: { color: C.textMuted, fontSize: 10, fontWeight: "600", letterSpacing: 0.5, marginTop: 3, textTransform: "uppercase" },
+  wrap:  { flex: 1, backgroundColor: C.card, borderRadius: R.lg, padding: S.md, alignItems: "center", borderWidth: 1, borderColor: C.border },
+  val:   { color: C.textPrimary, fontSize: 24, fontWeight: "800", letterSpacing: -0.5 },
+  label: { color: C.textSecondary, fontSize: 11, fontWeight: "600", letterSpacing: 0.5, marginTop: 4, textTransform: "uppercase" },
 });
 
 // ─── Alert pill ───────────────────────────────────────────────────────────────
@@ -42,9 +42,9 @@ const AlertPill = ({ label, color }) => (
   </View>
 );
 const ap = StyleSheet.create({
-  wrap: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: R.full, borderWidth: 1 },
-  dot:  { width: 5, height: 5, borderRadius: 3 },
-  text: { fontSize: 12, fontWeight: "600" },
+  wrap: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 6, borderRadius: R.full, borderWidth: 1 },
+  dot:  { width: 6, height: 6, borderRadius: 3 },
+  text: { fontSize: 13, fontWeight: "600", letterSpacing: 0.2 },
 });
 
 // ─── Section label ────────────────────────────────────────────────────────────
@@ -222,50 +222,51 @@ export default function Parent({ navigation }) {
 
             {/* Controls */}
             <SectionLabel>Parental controls</SectionLabel>
-            <View style={s.controlCard}>
-
-              <View style={s.controlField}>
-                <Text style={s.controlLabel}>Daily play limit</Text>
-                <Text style={s.controlDesc}>Maximum minutes per day before an alert is triggered</Text>
-                <View style={s.inputRow}>
-                  <TextInput
-                    placeholder="e.g. 90"
-                    placeholderTextColor={C.textMuted}
-                    value={limit}
-                    onChangeText={setLimit}
-                    style={[s.input, focusedInput && s.inputFocused]}
-                    keyboardType="numeric"
-                    onFocus={() => setFocusedInput(true)}
-                    onBlur={() => setFocusedInput(false)}
-                  />
-                  <View style={s.unitBox}>
-                    <Text style={s.unitText}>min</Text>
+            <View style={s.controlCardWrapper}>
+              <View style={s.controlCard}>
+                <View style={s.controlField}>
+                  <Text style={s.controlLabel}>Daily play limit</Text>
+                  <Text style={s.controlDesc}>Maximum minutes per day before an alert is triggered</Text>
+                  <View style={s.inputRow}>
+                    <TextInput
+                      placeholder="e.g. 90"
+                      placeholderTextColor={C.textMuted}
+                      value={limit}
+                      onChangeText={setLimit}
+                      style={[s.input, focusedInput && s.inputFocused]}
+                      keyboardType="numeric"
+                      onFocus={() => setFocusedInput(true)}
+                      onBlur={() => setFocusedInput(false)}
+                    />
+                    <View style={s.unitBox}>
+                      <Text style={s.unitText}>min</Text>
+                    </View>
                   </View>
                 </View>
-              </View>
 
-              <View style={s.divider} />
+                <View style={s.divider} />
 
-              <View style={s.switchRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={s.controlLabel}>Night restriction</Text>
-                  <Text style={s.controlDesc}>Sends alert if gaming starts between 12 AM and 4 AM</Text>
+                <View style={s.switchRow}>
+                  <View style={{ flex: 1, paddingRight: S.md }}>
+                    <Text style={s.controlLabel}>Night restriction</Text>
+                    <Text style={s.controlDesc}>Sends alert if gaming starts between 12 AM and 4 AM</Text>
+                  </View>
+                  <Switch
+                    value={night}
+                    onValueChange={setNight}
+                    trackColor={{ false: C.border, true: C.accent + "80" }}
+                    thumbColor={night ? C.accent : C.textSecondary}
+                  />
                 </View>
-                <Switch
-                  value={night}
-                  onValueChange={setNight}
-                  trackColor={{ false: C.border, true: C.accent + "80" }}
-                  thumbColor={night ? C.accent : C.textSecondary}
-                />
+
+                <View style={s.divider} />
+
+                <TouchableOpacity style={s.saveBtn} onPress={saveControls} activeOpacity={0.85}>
+                  <Text style={s.saveBtnText}>Save controls</Text>
+                </TouchableOpacity>
               </View>
-
-              <View style={s.divider} />
-
-              <TouchableOpacity style={s.saveBtn} onPress={saveControls} activeOpacity={0.85}>
-                <Text style={s.saveBtnText}>Save controls</Text>
-              </TouchableOpacity>
             </View>
-          </>
+          </View>
         )}
 
         {!data && children.length > 0 && (
@@ -281,93 +282,115 @@ export default function Parent({ navigation }) {
 
 const s = StyleSheet.create({
   root:   { flex: 1, backgroundColor: C.bg },
-  scroll: { paddingHorizontal: S.md, paddingBottom: 48 },
+  scroll: { paddingHorizontal: S.md, paddingBottom: 60 },
 
   navbar: {
-    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-    paddingHorizontal: S.lg, paddingVertical: S.md,
-    borderBottomWidth: 1, borderBottomColor: C.border,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: S.lg,
+    paddingVertical: S.lg,
+    paddingTop: S.xl,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.03)",
   },
-  navTitle:   { color: C.textPrimary, fontSize: 17, fontWeight: "700" },
-  navSub:     { color: C.textSecondary, fontSize: 12, marginTop: 1 },
-  signOutBtn: { paddingHorizontal: S.sm, paddingVertical: 6, borderRadius: R.sm, borderWidth: 1, borderColor: C.border },
-  signOutText: { color: C.textSecondary, fontSize: 12, fontWeight: "500" },
+  navTitle:   { color: C.textPrimary, fontSize: 18, fontWeight: "800", letterSpacing: -0.3 },
+  navSub:     { color: C.textSecondary, fontSize: 13, marginTop: 2, fontWeight: "500" },
+  signOutBtn: {
+    paddingHorizontal: S.md,
+    paddingVertical: 8,
+    borderRadius: R.md,
+    borderWidth: 1,
+    borderColor: C.border,
+    backgroundColor: C.input,
+  },
+  signOutText: { color: C.textPrimary, fontSize: 12, fontWeight: "600" },
 
   // Children list
   childRow: {
     flexDirection: "row", alignItems: "center", gap: S.sm,
-    backgroundColor: C.card, borderRadius: R.md,
+    backgroundColor: C.card, borderRadius: R.lg,
     borderWidth: 1, borderColor: C.border,
     padding: S.md, marginBottom: S.sm,
   },
   childRowActive: { borderColor: C.accent, backgroundColor: C.accentSoft },
   avatar: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: C.elevated, borderWidth: 1, borderColor: C.border,
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: C.input, borderWidth: 1, borderColor: C.border,
     alignItems: "center", justifyContent: "center",
   },
   avatarActive:     { backgroundColor: C.accent, borderColor: C.accent },
-  avatarText:       { color: C.textSecondary, fontWeight: "700", fontSize: 16 },
+  avatarText:       { color: C.textSecondary, fontWeight: "700", fontSize: 18 },
   avatarTextActive: { color: "#fff" },
-  childName:  { color: C.textSecondary, fontWeight: "600", fontSize: 15 },
-  childEmail: { color: C.textMuted, fontSize: 12, marginTop: 1 },
-  chevron:    { color: C.textMuted, fontSize: 22 },
+  childName:  { color: C.textSecondary, fontWeight: "700", fontSize: 16, letterSpacing: -0.3 },
+  childEmail: { color: C.textMuted, fontSize: 13, marginTop: 2 },
+  chevron:    { color: C.textMuted, fontSize: 24, fontWeight: "300" },
 
-  emptyWrap:  { paddingVertical: S.xl, gap: S.xs },
-  emptyTitle: { color: C.textSecondary, fontWeight: "600", fontSize: 15 },
-  emptyBody:  { color: C.textMuted, fontSize: 13, lineHeight: 19 },
+  emptyWrap:  { paddingVertical: S.xl, gap: S.sm, alignItems: "center" },
+  emptyTitle: { color: C.textPrimary, fontWeight: "700", fontSize: 18, letterSpacing: -0.3 },
+  emptyBody:  { color: C.textSecondary, fontSize: 14, lineHeight: 22, textAlign: "center", paddingHorizontal: S.md },
 
   // Stats
-  statsRow: { flexDirection: "row", gap: S.sm },
+  statsRow: { flexDirection: "row", gap: S.sm, flexWrap: "wrap" },
 
   // State card
   stateCard: {
-    backgroundColor: C.card, borderRadius: R.md,
+    backgroundColor: C.card, borderRadius: R.xl,
     borderWidth: 1, borderColor: C.border,
-    padding: S.md, marginTop: S.xs, gap: S.sm,
+    padding: S.lg, marginTop: S.sm, gap: S.md,
   },
   stateRow:  { flexDirection: "row", alignItems: "center", gap: S.sm },
-  stateDot:  { width: 8, height: 8, borderRadius: 4 },
-  stateLabel: { fontSize: 14, fontWeight: "600", flex: 1 },
-  riskScore:  { color: C.textSecondary, fontSize: 12, fontWeight: "500" },
-  riskTrack:  { height: 4, backgroundColor: C.border, borderRadius: 2, overflow: "hidden" },
-  riskFill:   { height: "100%", borderRadius: 2 },
+  stateDot:  { width: 10, height: 10, borderRadius: 5 },
+  stateLabel: { fontSize: 16, fontWeight: "700", flex: 1, letterSpacing: -0.2 },
+  riskScore:  { color: C.textSecondary, fontSize: 13, fontWeight: "600" },
+  riskTrack:  { height: 6, backgroundColor: "rgba(255,255,255,0.05)", borderRadius: 3, overflow: "hidden" },
+  riskFill:   { height: "100%", borderRadius: 3 },
 
-  alertRow: { flexDirection: "row", flexWrap: "wrap", gap: S.xs, marginTop: S.sm },
+  alertRow: { flexDirection: "row", flexWrap: "wrap", gap: S.sm, marginTop: S.md },
 
   // Controls
-  controlCard: {
-    backgroundColor: C.card, borderRadius: R.lg,
-    borderWidth: 1, borderColor: C.border,
+  controlCardWrapper: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 8,
+    marginBottom: S.lg,
   },
-  controlField: { padding: S.md, gap: 4 },
-  controlLabel: { color: C.textPrimary, fontSize: 14, fontWeight: "600" },
-  controlDesc:  { color: C.textMuted, fontSize: 12, lineHeight: 17, marginBottom: S.sm },
+  controlCard: {
+    backgroundColor: C.card, borderRadius: R.xl,
+    borderWidth: 1, borderColor: C.border,
+    overflow: "hidden",
+  },
+  controlField: { padding: S.lg, gap: 6 },
+  controlLabel: { color: C.textPrimary, fontSize: 15, fontWeight: "700", letterSpacing: -0.2 },
+  controlDesc:  { color: C.textSecondary, fontSize: 13, lineHeight: 19, marginBottom: S.md },
   inputRow:     { flexDirection: "row", alignItems: "center", gap: S.sm },
   input: {
     flex: 1, backgroundColor: C.input, color: C.textPrimary,
-    paddingHorizontal: S.md, paddingVertical: 12,
-    borderRadius: R.md, borderWidth: 1, borderColor: C.border, fontSize: 15,
+    paddingHorizontal: S.md, paddingVertical: 14,
+    borderRadius: R.md, borderWidth: 1, borderColor: C.border, fontSize: 16,
+    fontWeight: "500",
   },
-  inputFocused: { borderColor: C.accent },
-  unitBox:  { paddingHorizontal: S.sm, paddingVertical: 12, backgroundColor: C.elevated, borderRadius: R.md, borderWidth: 1, borderColor: C.border },
-  unitText: { color: C.textSecondary, fontSize: 13, fontWeight: "500" },
+  inputFocused: { borderColor: C.borderFocus, backgroundColor: "rgba(255,255,255,0.08)" },
+  unitBox:  { paddingHorizontal: S.md, paddingVertical: 14, backgroundColor: C.input, borderRadius: R.md, borderWidth: 1, borderColor: C.border },
+  unitText: { color: C.textSecondary, fontSize: 14, fontWeight: "600" },
 
   divider:   { height: 1, backgroundColor: C.border },
   switchRow: {
-    flexDirection: "row", alignItems: "center", gap: S.md,
-    padding: S.md,
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    padding: S.lg,
   },
 
   saveBtn: {
-    margin: S.md,
+    margin: S.lg,
     backgroundColor: C.accent,
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderRadius: R.md,
     alignItems: "center",
   },
-  saveBtnText: { color: "#fff", fontWeight: "600", fontSize: 14, letterSpacing: 0.3 },
+  saveBtnText: { color: "#fff", fontWeight: "700", fontSize: 15, letterSpacing: 0.3 },
 
   selectHint:     { alignItems: "center", paddingTop: S.xxl },
-  selectHintText: { color: C.textMuted, fontSize: 13 },
+  selectHintText: { color: C.textSecondary, fontSize: 14 },
 });

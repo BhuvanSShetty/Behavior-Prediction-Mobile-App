@@ -35,9 +35,9 @@ const StateBadge = ({ state }) => {
   );
 };
 const badge = StyleSheet.create({
-  wrap: { flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: R.full, borderWidth: 1 },
-  dot:  { width: 5, height: 5, borderRadius: 3 },
-  text: { fontSize: 12, fontWeight: "600" },
+  wrap: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 4, borderRadius: R.full, borderWidth: 1 },
+  dot:  { width: 6, height: 6, borderRadius: 3 },
+  text: { fontSize: 12, fontWeight: "600", letterSpacing: 0.2 },
 });
 
 // ─── Section heading ──────────────────────────────────────────────────────────
@@ -162,8 +162,6 @@ export default function Dashboard({ navigation }) {
 
     return (
       <View style={card.wrap}>
-        {/* Accent bar */}
-        <View style={[card.accentBar, { backgroundColor: color }]} />
 
         <View style={card.body}>
           {/* Top row */}
@@ -200,7 +198,7 @@ export default function Dashboard({ navigation }) {
               ].map(({ state: st, color: co }) => (
                 <TouchableOpacity
                   key={st}
-                  style={[card.feedBtn, { borderColor: C.border }]}
+                  style={[card.feedBtn, { borderColor: "rgba(255,255,255,0.08)" }]}
                   onPress={() => handleFeedback(item._id, st)}
                   activeOpacity={0.7}>
                   <View style={[card.feedDot, { backgroundColor: co }]} />
@@ -285,41 +283,40 @@ export default function Dashboard({ navigation }) {
 // ─── Card ─────────────────────────────────────────────────────────────────────
 const card = StyleSheet.create({
   wrap: {
-    flexDirection: "row",
     backgroundColor: C.card,
-    borderRadius: R.lg,
+    borderRadius: R.xl,
     borderWidth: 1,
     borderColor: C.border,
-    marginBottom: S.sm,
+    marginBottom: S.md,
     overflow: "hidden",
+    padding: S.lg,
+    gap: S.md,
   },
-  accentBar: { width: 3 },
-  body:      { flex: 1, padding: S.md, gap: S.sm },
 
   topRow:    { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   rightCol:  { alignItems: "flex-end", gap: 6 },
 
-  sessionNum:   { color: C.textMuted, fontSize: 11, fontWeight: "500", marginBottom: 2 },
-  duration:     { color: C.textPrimary, fontSize: 30, fontWeight: "700" },
-  durationUnit: { fontSize: 15, fontWeight: "400", color: C.textSecondary },
-  risk:         { fontSize: 11, fontWeight: "500", marginTop: 2 },
+  sessionNum:   { color: C.textMuted, fontSize: 12, fontWeight: "600", marginBottom: 2, textTransform: "uppercase", letterSpacing: 0.5 },
+  duration:     { color: C.textPrimary, fontSize: 32, fontWeight: "800", letterSpacing: -1 },
+  durationUnit: { fontSize: 16, fontWeight: "500", color: C.textSecondary, letterSpacing: 0 },
+  risk:         { fontSize: 12, fontWeight: "600", marginTop: 4 },
 
-  feedRow:    { gap: S.xs },
-  feedLabel:  { color: C.textMuted, fontSize: 11, fontWeight: "500" },
-  feedBtns:   { flexDirection: "row", gap: S.xs },
+  feedRow:    { gap: S.sm, marginTop: S.xs },
+  feedLabel:  { color: C.textSecondary, fontSize: 12, fontWeight: "600" },
+  feedBtns:   { flexDirection: "row", gap: S.sm },
   feedBtn: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 5,
-    paddingVertical: 8,
-    borderRadius: R.sm,
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: R.md,
     borderWidth: 1,
-    backgroundColor: C.elevated,
+    backgroundColor: C.input,
   },
   feedDot:     { width: 6, height: 6, borderRadius: 3 },
-  feedBtnText: { color: C.textSecondary, fontSize: 11, fontWeight: "600" },
+  feedBtnText: { color: C.textPrimary, fontSize: 12, fontWeight: "600" },
 });
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
@@ -331,62 +328,64 @@ const s = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: S.lg,
-    paddingVertical: S.md,
+    paddingVertical: S.lg,
+    paddingTop: S.xl,
     borderBottomWidth: 1,
-    borderBottomColor: C.border,
+    borderBottomColor: "rgba(255,255,255,0.03)",
   },
-  navTitle: { color: C.textPrimary, fontSize: 17, fontWeight: "700" },
-  navSub:   { color: C.textSecondary, fontSize: 12, marginTop: 1 },
+  navTitle: { color: C.textPrimary, fontSize: 18, fontWeight: "800", letterSpacing: -0.3 },
+  navSub:   { color: C.textSecondary, fontSize: 13, marginTop: 2, fontWeight: "500" },
   signOutBtn: {
-    paddingHorizontal: S.sm,
-    paddingVertical: 6,
-    borderRadius: R.sm,
+    paddingHorizontal: S.md,
+    paddingVertical: 8,
+    borderRadius: R.md,
     borderWidth: 1,
     borderColor: C.border,
+    backgroundColor: C.input,
   },
-  signOutText: { color: C.textSecondary, fontSize: 12, fontWeight: "500" },
+  signOutText: { color: C.textPrimary, fontSize: 12, fontWeight: "600" },
 
-  list: { paddingHorizontal: S.md, paddingBottom: 40 },
+  list: { paddingHorizontal: S.md, paddingBottom: 60 },
 
   // Status card
   statusCard: {
     backgroundColor: C.card,
-    borderRadius: R.lg,
+    borderRadius: R.xl,
     borderWidth: 1,
     borderColor: C.border,
-    padding: S.lg,
+    padding: S.xl,
     marginTop: S.md,
-    gap: S.sm,
+    gap: S.md,
   },
-  statusCardActive: { borderColor: C.accent + "60" },
+  statusCardActive: { borderColor: C.accent + "60", backgroundColor: C.accentSoft },
   statusRow:  { flexDirection: "row", alignItems: "center", gap: S.sm },
   statusDot:  { width: 8, height: 8, borderRadius: 4 },
-  statusLabel: { fontSize: 15, fontWeight: "600", color: C.textPrimary },
-  statusHint: { color: C.textSecondary, fontSize: 13, lineHeight: 19 },
+  statusLabel: { fontSize: 16, fontWeight: "700", color: C.textPrimary, letterSpacing: -0.2 },
+  statusHint: { color: C.textSecondary, fontSize: 14, lineHeight: 22 },
 
   startBtn: {
     backgroundColor: C.accent,
     borderRadius: R.md,
-    paddingVertical: 13,
+    paddingVertical: 14,
     alignItems: "center",
     marginTop: S.xs,
   },
-  startBtnText: { color: "#fff", fontWeight: "600", fontSize: 14 },
+  startBtnText: { color: "#fff", fontWeight: "700", fontSize: 14, letterSpacing: 0.3 },
 
   stopBtn: {
-    backgroundColor: C.elevated,
+    backgroundColor: C.input,
     borderRadius: R.md,
-    paddingVertical: 13,
+    paddingVertical: 14,
     alignItems: "center",
     marginTop: S.xs,
     borderWidth: 1,
     borderColor: C.danger + "60",
   },
-  stopBtnText: { color: C.danger, fontWeight: "600", fontSize: 14 },
+  stopBtnText: { color: C.danger, fontWeight: "700", fontSize: 14 },
 
-  emptyWrap:      { alignItems: "center", paddingTop: S.xxl, paddingHorizontal: S.lg, gap: S.sm },
-  emptyIcon:      { width: 48, height: 48, borderRadius: R.md, backgroundColor: C.elevated, alignItems: "center", justifyContent: "center", marginBottom: S.sm },
-  emptyIconInner: { width: 20, height: 20, borderRadius: 4, backgroundColor: C.border },
-  emptyTitle:     { color: C.textSecondary, fontSize: 16, fontWeight: "600" },
-  emptyBody:      { color: C.textMuted, fontSize: 13, textAlign: "center", lineHeight: 20 },
+  emptyWrap:      { alignItems: "center", paddingTop: S.xxl, paddingHorizontal: S.lg, gap: S.md },
+  emptyIcon:      { width: 56, height: 56, borderRadius: R.lg, backgroundColor: C.input, alignItems: "center", justifyContent: "center", marginBottom: S.sm, borderWidth: 1, borderColor: C.border },
+  emptyIconInner: { width: 24, height: 24, borderRadius: 6, backgroundColor: C.borderFocus },
+  emptyTitle:     { color: C.textPrimary, fontSize: 18, fontWeight: "700", letterSpacing: -0.3 },
+  emptyBody:      { color: C.textSecondary, fontSize: 14, textAlign: "center", lineHeight: 22 },
 });

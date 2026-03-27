@@ -4,47 +4,40 @@
 // Status: muted semantic colours that communicate without screaming
 
 export const C = {
-  // Backgrounds
-  bg:       "#0D0D14",
-  card:     "#13131C",
-  elevated: "#1A1A26",
-  input:    "#10101A",
-
+  // Backgrounds: Deep Zinc
+  bg:       "#09090b", // zinc-950
+  card:     "#18181b80", // zinc-900 at 50% opacity (pseudo-glass)
+  elevated: "#27272a", // zinc-800
+  input:    "#ffffff08", // 3% white for floating fields
+  
   // Borders
-  border:      "#22222F",
-  borderFocus: "#6366F1",
+  border:      "#ffffff15", // 8% white
+  borderFocus: "#6366f1", // indigo-500
 
   // Primary accent — indigo
-  accent:    "#6366F1",
-  accentSoft:"#6366F120",
-  accentDim: "#4F52D4",
+  accent:    "#6366f1",
+  accentSoft:"#6366f120",
+  accentDim: "#4f46e5", // indigo-600
 
-  // Status colours — desaturated, professional
-  success: "#34D399",   // emerald
-  warning: "#FBBF24",   // amber
-  danger:  "#F87171",   // rose
-  info:    "#60A5FA",   // sky
+  // Status colours — vibrant but grounded
+  success: "#10b981",   // emerald-500
+  warning: "#f59e0b",   // amber-500
+  danger:  "#ef4444",   // red-500
+  info:    "#3b82f6",   // blue-500
+  purple:  "#8b5cf6",   // violet-500
 
   // Text
-  textPrimary:   "#E8E8F0",
-  textSecondary: "#6B6B8A",
-  textMuted:     "#35354A",
-
-  // Aliases used in screen imports
-  green:  "#34D399",
-  yellow: "#FBBF24",
-  red:    "#F87171",
-  blue:   "#60A5FA",
-  purple: "#A78BFA",
-  orange: "#FB923C",
+  textPrimary:   "#f8fafc", // slate-50
+  textSecondary: "#94a3b8", // slate-400
+  textMuted:     "#64748b", // slate-500
 };
 
 export const S = {
-  xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48,
+  xs: 8, sm: 12, md: 16, lg: 24, xl: 32, xxl: 48,
 };
 
 export const R = {
-  sm: 6, md: 10, lg: 16, xl: 22, full: 999,
+  sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, full: 9999,
 };
 
 export const stateColor = (state) => {

@@ -69,110 +69,146 @@ export default function RegisterScreen({ navigation }) {
         <View style={s.container}>
           
           {/* Header */}
-          <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
-            <Text style={s.backText}>Back</Text>
-          </TouchableOpacity>
-
-          <Text style={s.title}>Create account</Text>
-          <Text style={s.sub}>Set up your monitoring profile</Text>
-
-          {/* Role Selection */}
-          <View style={s.section}>
-            <Text style={s.sectionLabel}>Account type</Text>
-
-            {[
-              { key: "child", label: "Player" },
-              { key: "parent", label: "Guardian" },
-            ].map((item) => (
-              <TouchableOpacity
-                key={item.key}
-                style={[
-                  s.roleBtn,
-                  form.role === item.key && s.roleBtnActive,
-                ]}
-                onPress={() => set("role", item.key)}
-              >
-                <Text style={s.roleText}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
+          <View style={s.headerRow}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
+              <Text style={s.backText}>← Back</Text>
+            </TouchableOpacity>
           </View>
 
-          {/* Inputs */}
-          <TextInput
-            placeholder="Name"
-            placeholderTextColor={C.textMuted}
-            style={[s.input, focused === "name" && s.inputFocused]}
-            value={form.name}
-            onChangeText={(v) => set("name", v)}
-            onFocus={() => setFocused("name")}
-            onBlur={() => setFocused("")}
-          />
+          <View style={s.cardWrapper}>
+            <View style={s.card}>
+              <Text style={s.title}>Create account</Text>
+              <Text style={s.sub}>Set up your monitoring profile</Text>
 
-          <TextInput
-            placeholder="Email"
-            placeholderTextColor={C.textMuted}
-            style={[s.input, focused === "email" && s.inputFocused]}
-            value={form.email}
-            onChangeText={(v) => set("email", v)}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            onFocus={() => setFocused("email")}
-            onBlur={() => setFocused("")}
-          />
+              <View style={s.form}>
+                {/* Role Selection */}
+                <View style={s.section}>
+                  <Text style={s.fieldLabel}>Account type</Text>
 
-          <TextInput
-            placeholder="Password"
-            placeholderTextColor={C.textMuted}
-            style={[s.input, focused === "password" && s.inputFocused]}
-            value={form.password}
-            onChangeText={(v) => set("password", v)}
-            secureTextEntry
-            onFocus={() => setFocused("password")}
-            onBlur={() => setFocused("")}
-          />
+                  <View style={s.roleGroup}>
+                    {[
+                      { key: "parent", label: "Parent / Guardian" },
+                      { key: "child", label: "Child / Player" },
+                    ].map((item) => (
+                      <TouchableOpacity
+                        key={item.key}
+                        activeOpacity={0.8}
+                        style={[
+                          s.roleBtn,
+                          form.role === item.key && s.roleBtnActive,
+                        ]}
+                        onPress={() => set("role", item.key)}
+                      >
+                        <Text style={[
+                          s.roleText,
+                          form.role === item.key && s.roleTextActive
+                        ]}>{item.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
 
-          {/* Age */}
-          {form.role === "child" && (
-            <View style={s.ageRow}>
-              {AGE_GROUPS.map((g) => (
+                {/* Inputs */}
+                <View style={s.fieldWrap}>
+                  <Text style={s.fieldLabel}>Full name</Text>
+                  <TextInput
+                    placeholder="Enter full name"
+                    placeholderTextColor={C.textMuted}
+                    style={[s.input, focused === "name" && s.inputFocused]}
+                    value={form.name}
+                    onChangeText={(v) => set("name", v)}
+                    onFocus={() => setFocused("name")}
+                    onBlur={() => setFocused("")}
+                  />
+                </View>
+
+                <View style={s.fieldWrap}>
+                  <Text style={s.fieldLabel}>Email address</Text>
+                  <TextInput
+                    placeholder="you@example.com"
+                    placeholderTextColor={C.textMuted}
+                    style={[s.input, focused === "email" && s.inputFocused]}
+                    value={form.email}
+                    onChangeText={(v) => set("email", v)}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    onFocus={() => setFocused("email")}
+                    onBlur={() => setFocused("")}
+                  />
+                </View>
+
+                <View style={s.fieldWrap}>
+                  <Text style={s.fieldLabel}>Password</Text>
+                  <TextInput
+                    placeholder="Create a strong password"
+                    placeholderTextColor={C.textMuted}
+                    style={[s.input, focused === "password" && s.inputFocused]}
+                    value={form.password}
+                    onChangeText={(v) => set("password", v)}
+                    secureTextEntry
+                    onFocus={() => setFocused("password")}
+                    onBlur={() => setFocused("")}
+                  />
+                </View>
+
+                {/* Parent Code */}
+                {form.role === "child" && (
+                  <View style={s.fieldWrap}>
+                    <Text style={s.fieldLabel}>Parent Code (Optional)</Text>
+                    <TextInput
+                      placeholder="e.g. 64b8d9..."
+                      placeholderTextColor={C.textMuted}
+                      style={[s.input, focused === "code" && s.inputFocused]}
+                      value={form.parentCode}
+                      onChangeText={(v) => set("parentCode", v)}
+                      onFocus={() => setFocused("code")}
+                      onBlur={() => setFocused("")}
+                    />
+                  </View>
+                )}
+
+                {/* Age */}
+                {form.role === "child" && (
+                  <View style={s.section}>
+                    <Text style={s.fieldLabel}>Age group</Text>
+                    <View style={s.ageRow}>
+                      {AGE_GROUPS.map((g) => (
+                        <TouchableOpacity
+                          key={g}
+                          activeOpacity={0.8}
+                          style={[
+                            s.ageBtn,
+                            form.ageGroup === g && s.ageBtnActive,
+                          ]}
+                          onPress={() => set("ageGroup", g)}
+                        >
+                          <Text style={[
+                            s.ageText, 
+                            form.ageGroup === g && s.ageTextActive
+                          ]}>{g}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {/* Button */}
                 <TouchableOpacity
-                  key={g}
-                  style={[
-                    s.ageBtn,
-                    form.ageGroup === g && s.ageBtnActive,
-                  ]}
-                  onPress={() => set("ageGroup", g)}
+                  style={[s.btn, loading && s.btnLoading]}
+                  onPress={handleRegister}
+                  disabled={loading}
+                  activeOpacity={0.85}
                 >
-                  <Text style={s.ageText}>{g}</Text>
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={s.btnText}>Create account</Text>
+                  )}
                 </TouchableOpacity>
-              ))}
+
+              </View>
             </View>
-          )}
-
-          {/* Parent Code */}
-          {form.role === "child" && (
-            <TextInput
-              placeholder="Parent Code (optional)"
-              placeholderTextColor={C.textMuted}
-              style={s.input}
-              value={form.parentCode}
-              onChangeText={(v) => set("parentCode", v)}
-            />
-          )}
-
-          {/* Button */}
-          <TouchableOpacity
-            style={s.btn}
-            onPress={handleRegister}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={s.btnText}>Register</Text>
-            )}
-          </TouchableOpacity>
-
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -184,81 +220,135 @@ const s = StyleSheet.create({
 
   container: {
     flex: 1,
-    padding: S.lg,
+    paddingHorizontal: S.lg,
+    paddingBottom: S.xl,
+    justifyContent: "center",
   },
 
-  backBtn: { marginBottom: S.md },
-  backText: { color: C.textSecondary },
+  headerRow: {
+    marginBottom: S.xl,
+    alignItems: "flex-start",
+  },
+  backBtn: {
+    paddingVertical: S.sm,
+    paddingHorizontal: S.sm,
+    marginLeft: -S.sm,
+  },
+  backText: {
+    color: C.textSecondary,
+    fontSize: 15,
+    fontWeight: "600",
+  },
+
+  // Card Structure
+  cardWrapper: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.8,
+    shadowRadius: 40,
+    elevation: 20,
+  },
+  card: {
+    backgroundColor: C.card,
+    borderRadius: R.xl,
+    borderWidth: 1,
+    borderColor: C.border,
+    padding: S.xl,
+  },
 
   title: {
-    fontSize: 26,
+    fontSize: 24,
     color: C.textPrimary,
-    fontWeight: "bold",
+    fontWeight: "800",
+    letterSpacing: -0.5,
+    marginBottom: 4,
   },
-
   sub: {
+    fontSize: 14,
     color: C.textSecondary,
-    marginBottom: S.lg,
+    marginBottom: S.xl,
   },
 
-  section: { marginBottom: S.lg },
-  sectionLabel: { color: C.textSecondary },
+  form: { gap: S.md },
+  fieldWrap: { gap: 8 },
+  section: { gap: 8 },
+  
+  fieldLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: C.textSecondary,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
 
+  // Form Controls
+  roleGroup: {
+    flexDirection: "row",
+    gap: S.sm,
+  },
   roleBtn: {
-    padding: S.md,
-    backgroundColor: C.card,
+    flex: 1,
+    paddingVertical: 14,
+    backgroundColor: C.input,
     borderRadius: R.md,
-    marginTop: S.sm,
+    borderWidth: 1,
+    borderColor: C.border,
+    alignItems: "center",
   },
-
   roleBtnActive: {
-    backgroundColor: C.accentSoft,
+    backgroundColor: "rgba(99,102,241,0.15)",
+    borderColor: C.borderFocus,
   },
-
-  roleText: { color: C.textPrimary },
+  roleText: { color: C.textSecondary, fontWeight: "600", fontSize: 13 },
+  roleTextActive: { color: C.accentDim },
 
   input: {
     backgroundColor: C.input,
-    padding: S.md,
+    paddingHorizontal: S.md,
+    paddingVertical: 16,
     borderRadius: R.md,
-    marginBottom: S.md,
     borderWidth: 1,
     borderColor: C.border,
     color: C.textPrimary,
+    fontSize: 15,
   },
-
   inputFocused: {
-    borderColor: C.accent,
+    borderColor: C.borderFocus,
+    backgroundColor: "rgba(255,255,255,0.08)",
   },
 
   ageRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: S.sm,
-    marginBottom: S.md,
+    gap: 8,
   },
-
   ageBtn: {
-    padding: S.sm,
-    backgroundColor: C.card,
-    borderRadius: R.full,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: C.input,
+    borderRadius: R.lg,
+    borderWidth: 1,
+    borderColor: C.border,
   },
-
   ageBtnActive: {
-    backgroundColor: C.accentSoft,
+    backgroundColor: "rgba(99,102,241,0.15)",
+    borderColor: C.borderFocus,
   },
-
-  ageText: { color: C.textPrimary },
+  ageText: { color: C.textSecondary, fontSize: 13, fontWeight: "600" },
+  ageTextActive: { color: C.accentDim },
 
   btn: {
     backgroundColor: C.accent,
-    padding: S.md,
+    paddingVertical: 15,
     borderRadius: R.md,
     alignItems: "center",
+    marginTop: S.sm,
   },
-
+  btnLoading: { opacity: 0.6 },
   btnText: {
     color: "#fff",
-    fontWeight: "bold",
+    fontWeight: "600",
+    fontSize: 15,
+    letterSpacing: 0.3,
   },
 });
