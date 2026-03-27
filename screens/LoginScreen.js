@@ -22,18 +22,24 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     setLoading(true);
+    console.log("--- ATTEMPTING LOGIN ---");
+    console.log("Email:", email);
+    
     try {
-      
       const user = await login(email, password);
+      console.log("Login Success! Received User:", user);
+      console.log("User Role is:", user?.role);
 
-      
-      if (user.role === "parent") {
+      if (user?.role === "parent") {
+        console.log("Navigating to Parent...");
         navigation.replace("Parent");
       } else {
+        console.log("Navigating to Dashboard...");
         navigation.replace("Dashboard");
       }
     } catch (e) {
-      Alert.alert("Login Failed");
+      console.log("HANDLE LOGIN CAUGHT ERROR:", e);
+      Alert.alert("Login Failed", e?.response?.data?.message || "Verify your credentials.");
     } finally {
       setLoading(false);
     }
