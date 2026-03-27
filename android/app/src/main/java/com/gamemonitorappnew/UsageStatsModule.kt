@@ -3,6 +3,7 @@ package com.gamemonitorappnew
 import android.app.usage.UsageStatsManager
 import android.app.usage.UsageEvents
 import android.app.AppOpsManager
+import android.util.Log
 import android.provider.Settings
 import android.content.Context
 import android.content.Intent
@@ -11,6 +12,8 @@ import android.content.pm.ApplicationInfo
 import com.facebook.react.bridge.*
 
 class UsageStatsModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+
+    private val TAG = "UsageStatsModule"
 
     override fun getName(): String {
         return "UsageStatsModule"
@@ -73,49 +76,71 @@ class UsageStatsModule(reactContext: ReactApplicationContext) : ReactContextBase
         try {
             val usageStatsManager = reactApplicationContext.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
             val time = System.currentTimeMillis()
+            val selfPkg = reactApplicationContext.packageName
             
             // 🚀 Switch to UsageEvents for precision
-            val events = usageStatsManager.queryEvents(time - 1000 * 20, time) // check last 20 sec
+            val events = usageStatsManager.queryEvents(time - 1000 * 60, time) // broad check: 60 sec
             val event = UsageEvents.Event()
-            var lastPkg: String? = null
+            var lastOtherPkg: String? = null
+            var currentForegroundPkg: String? = null
 
             while (events.hasNextEvent()) {
                 events.getNextEvent(event)
-                if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                    lastPkg = event.packageName
+                // 🕵️ Log event for debugging
+                // Log.d(TAG, "Event: ${event.packageName} Type: ${event.eventType}")
+                
+                // TYPE 1: MOVE_TO_FOREGROUND
+                // TYPE 10: ACTIVITY_RESUMED (API 29+)
+                if (event.eventType == 1 || event.eventType == 10) {
+                    currentForegroundPkg = event.packageName
+                    if (event.packageName != selfPkg) {
+                        lastOtherPkg = event.packageName
+                    }
                 }
             }
             
-            if (lastPkg != null) {
+            // If the current foreground is NOT the app, return it.
+            // If the current foreground IS the app, return the *last other* app we saw.
+            val pkgToReport = if (currentForegroundPkg != selfPkg) currentForegroundPkg else lastOtherPkg
+
+            if (pkgToReport != null) {
                 val map = Arguments.createMap()
-                map.putString("packageName", lastPkg)
+                map.putString("packageName", pkgToReport)
                 
                 // 🕵️ Game detection logic
                 var isGame = false
                 try {
                     val pm = reactApplicationContext.packageManager
-                    val info = pm.getApplicationInfo(lastPkg, 0)
+                    val info = pm.getApplicationInfo(pkgToReport, 0)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         isGame = (info.category == ApplicationInfo.CATEGORY_GAME)
                     } else {
                         isGame = (info.flags and ApplicationInfo.FLAG_IS_GAME) != 0
                     }
                 } catch (e: Exception) {
-                    // ignore packagemanager errors
+                    // ignore
                 }
                 
                 map.putBoolean("isGame", isGame)
                 promise.resolve(map)
             } else {
-                // Fallback to UsageStats if events log is empty
+                // Secondary check using UsageStats if events stream is silent
                 val stats = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 10, time)
                 if (stats != null && stats.isNotEmpty()) {
                     var latest = stats[0]
-                    for (s in stats) { if (s.lastTimeUsed > latest.lastTimeUsed) latest = s }
-                    val map = Arguments.createMap()
-                    map.putString("packageName", latest.packageName)
-                    map.putBoolean("isGame", false) // basic fallback
-                    promise.resolve(map)
+                    for (s in stats) { 
+                        if (s.lastTimeUsed > latest.lastTimeUsed && s.packageName != selfPkg) {
+                           latest = s 
+                        }
+                    }
+                    if (latest.packageName != selfPkg) {
+                        val map = Arguments.createMap()
+                        map.putString("packageName", latest.packageName)
+                        map.putBoolean("isGame", false)
+                        promise.resolve(map)
+                    } else {
+                        promise.resolve(null)
+                    }
                 } else {
                     promise.resolve(null)
                 }
