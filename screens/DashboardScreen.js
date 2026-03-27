@@ -135,9 +135,11 @@ export default function Dashboard({ navigation }) {
   const handleFeedback = async (id, state) => {
     try {
       await submitFeedback(id, false, state);
+      Alert.alert("Success", "Feedback submitted. This helps improve accuracy!");
       load();
     } catch (e) {
       console.log("Feedback error:", e);
+      Alert.alert("Error", "Could not submit feedback.");
     }
   };
 
@@ -195,16 +197,26 @@ export default function Dashboard({ navigation }) {
                 { state: "Normal",     color: C.success },
                 { state: "Frustrated", color: C.warning },
                 { state: "Addicted",   color: C.danger  },
-              ].map(({ state: st, color: co }) => (
-                <TouchableOpacity
-                  key={st}
-                  style={[card.feedBtn, { borderColor: "rgba(255,255,255,0.08)" }]}
-                  onPress={() => handleFeedback(item._id, st)}
-                  activeOpacity={0.7}>
-                  <View style={[card.feedDot, { backgroundColor: co }]} />
-                  <Text style={card.feedBtnText}>{st}</Text>
-                </TouchableOpacity>
-              ))}
+              ].map(({ state: st, color: co }) => {
+                const isActive = item?.prediction?.state === st;
+                return (
+                  <TouchableOpacity
+                    key={st}
+                    style={[
+                      card.feedBtn, 
+                      { borderColor: "rgba(255,255,255,0.08)" },
+                      isActive && { backgroundColor: co + "15", borderColor: co + "40" }
+                    ]}
+                    onPress={() => handleFeedback(item._id, st)}
+                    activeOpacity={0.7}>
+                    <View style={[card.feedDot, { backgroundColor: co }]} />
+                    <Text style={[
+                      card.feedBtnText,
+                      isActive && { color: co }
+                    ]}>{st}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
         </View>

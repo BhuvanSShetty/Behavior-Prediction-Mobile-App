@@ -10,6 +10,7 @@ import {
   Alert,
   StatusBar,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 
 import {
@@ -66,6 +67,8 @@ export default function Parent({ navigation }) {
   const [limit,         setLimit]         = useState("");
   const [night,         setNight]         = useState(false);
   const [focusedInput,  setFocusedInput]  = useState(false);
+  const [saving,        setSaving]        = useState(false);
+  const [loadingData,   setLoadingData]   = useState(false);
 
   const load = async () => {
     try {
@@ -80,24 +83,36 @@ export default function Parent({ navigation }) {
 
   const open = async (child) => {
     setSelectedChild(child);
+    setLoadingData(true);
+    setData(null); // Clear old data for clean UI transition
     try {
       const res = await fetchChildDash(child._id);
       setData(res);
+      // Auto-populate control fields if data provides it
+      if (res?.controls) {
+        setLimit(String(res.controls.dailyLimitMinutes || ""));
+        setNight(res.controls.nightRestriction || false);
+      }
     } catch (e) {
       console.log("Dashboard error:", e);
+    } finally {
+      setLoadingData(false);
     }
   };
 
   const saveControls = async () => {
+    setSaving(true);
     try {
       await updateControls(selectedChild._id, {
         dailyLimitMinutes: Number(limit),
         nightRestriction: night,
       });
-      Alert.alert("Controls updated");
+      Alert.alert("Success", "Parental controls saved successfully.");
     } catch (e) {
-      Alert.alert("Update failed");
+      Alert.alert("Update failed", "Please try again later.");
       console.log(e);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -164,7 +179,14 @@ export default function Parent({ navigation }) {
         )}
 
         {/* ── Selected child detail ────────────────────────────────────── */}
-        {data && (
+        {loadingData && (
+          <View style={s.loadingFull}>
+            <ActivityIndicator size="large" color={C.accent} />
+            <Text style={s.loadingText}>Fetching child data...</Text>
+          </View>
+        )}
+
+        {!loadingData && data && (
           <>
             <SectionLabel>
               {selectedChild?.name || "Child"} — today
@@ -261,8 +283,17 @@ export default function Parent({ navigation }) {
 
                 <View style={s.divider} />
 
-                <TouchableOpacity style={s.saveBtn} onPress={saveControls} activeOpacity={0.85}>
-                  <Text style={s.saveBtnText}>Save controls</Text>
+                <TouchableOpacity 
+                  style={[s.saveBtn, saving && { opacity: 0.7 }]} 
+                  onPress={saveControls} 
+                  disabled={saving}
+                  activeOpacity={0.85}
+                >
+                  {saving ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={s.saveBtnText}>Save changes</Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
