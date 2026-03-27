@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   StatusBar,
+  Alert,
 } from "react-native";
 
 import {
@@ -373,7 +374,7 @@ const s = StyleSheet.create({
   statusRow:  { flexDirection: "row", alignItems: "center", gap: S.sm },
   statusDot:  { width: 8, height: 8, borderRadius: 4 },
   statusLabel: { fontSize: 16, fontWeight: "700", color: C.textPrimary, letterSpacing: -0.2 },
-  statusHint: { color: C.textSecondary, fontSize: 14, lineHeight: 22 },
+  statusHint: { color: C.textSecondary, fontSize: 14, lineHeight: 22 }, // Renamed from selectHintText to statusHint as per original context
 
   startBtn: {
     backgroundColor: C.accent,

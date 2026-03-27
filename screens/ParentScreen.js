@@ -422,6 +422,18 @@ const s = StyleSheet.create({
   },
   saveBtnText: { color: "#fff", fontWeight: "700", fontSize: 15, letterSpacing: 0.3 },
 
-  selectHint:     { alignItems: "center", paddingTop: S.xxl },
   selectHintText: { color: C.textSecondary, fontSize: 14 },
+
+  loadingFull: {
+    marginTop: S.xxl,
+    padding: S.xxl,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    color: C.textSecondary,
+    marginTop: S.md,
+    fontSize: 14,
+    fontWeight: "500",
+  },
 });
