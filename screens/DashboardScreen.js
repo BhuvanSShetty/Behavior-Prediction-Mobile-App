@@ -11,6 +11,7 @@ import {
 
 import {
   startGameDetection,
+  stopGameDetection,
   addListener,
   hasUsagePermission,
   openUsageSettings,
@@ -108,6 +109,7 @@ export default function Dashboard({ navigation }) {
     }
     return () => {
       if (typeof unsub === "function") unsub();
+      stopGameDetection();
     };
   }, []);
 

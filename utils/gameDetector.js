@@ -3,17 +3,19 @@ import { sendSession } from "../services/sessionService";
 
 const { UsageStatsModule } = NativeModules || {};
 
-const TARGET_PACKAGES = new Set([
-  "com.leveldevil.game",
-  "com.android.chrome",
-]);
-
 let playing = false;
 let startTime = null;
 let timer = null;
 
 export const startGameDetection = () => {
   if (timer) return; // prevent multiple loops
+
+  // 🚀 START NATIVE FOREGROUND SERVICE
+  if (UsageStatsModule && UsageStatsModule.startService) {
+    UsageStatsModule.startService()
+      .then(() => console.log("✅ Foreground Service Started"))
+      .catch(e => console.log("⚠️ Service failed", e));
+  }
 
   timer = setInterval(async () => {
     try {
@@ -23,28 +25,28 @@ export const startGameDetection = () => {
         return;
       }
 
-      const pkg = await UsageStatsModule.getCurrentApp();
+      const res = await UsageStatsModule.getCurrentApp();
 
       // ✅ If nothing detected → wait silently
-      if (!pkg) {
+      if (!res || !res.packageName) {
         return;
       }
 
-      console.log("📱 Current App:", pkg);
+      const pkg = res.packageName;
+      const isGame = res.isGame;
 
-      const isTarget = TARGET_PACKAGES.has(pkg);
+      console.log("📱 Current App:", pkg, isGame ? "(GAME)" : "(APP)");
 
-      // 🎮 Game start
-      if (isTarget && !playing) {
+      // 🎮 Game start (Any Category: Game)
+      if (isGame && !playing) {
         playing = true;
         startTime = Date.now();
-        console.log("🎮 START");
+        console.log("🎮 STARTING UNIVERSAL SESSION");
       }
 
       // 🛑 Game end
-      if (!isTarget && playing) {
+      if (!isGame && playing) {
         const end = Date.now();
-
         try {
           await sendSession(startTime, end);
         } catch (e) {
@@ -53,8 +55,7 @@ export const startGameDetection = () => {
 
         playing = false;
         startTime = null;
-
-        console.log("🛑 END");
+        console.log("🛑 ENDING UNIVERSAL SESSION");
       }
 
     } catch (e) {
@@ -62,4 +63,19 @@ export const startGameDetection = () => {
       console.log("⚠️ Detector error (ignored):", e);
     }
   }, 2000);
+};
+
+export const stopGameDetection = () => {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    console.log("🛑 Detection Timer Stopped");
+  }
+
+  // 🚀 STOP NATIVE FOREGROUND SERVICE
+  if (UsageStatsModule && UsageStatsModule.stopService) {
+    UsageStatsModule.stopService()
+      .then(() => console.log("✅ Foreground Service Stopped"))
+      .catch(e => console.log("⚠️ Service stop failed", e));
+  }
 };
