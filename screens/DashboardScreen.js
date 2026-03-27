@@ -65,6 +65,7 @@ export default function Dashboard({ navigation }) {
   const [sessions,    setSessions]    = useState([]);
   const [manualStart, setManualStart] = useState(null);
   const [isPlaying,   setIsPlaying]   = useState(false);
+  const [hasPermission, setHasPermission] = useState(true);
 
   // Load sessions
   const load = async () => {
@@ -77,18 +78,18 @@ export default function Dashboard({ navigation }) {
   };
 
   // Permission check
+  const checkPerms = async () => {
+    try {
+      const ok = await hasUsagePermission();
+      setHasPermission(ok);
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        const ok = await hasUsagePermission();
-        if (!ok) {
-          alert("Enable Usage Access");
-          openUsageSettings();
-        }
-      } catch (e) {
-        console.log("Permission error:", e);
-      }
-    })();
+    checkPerms();
   }, []);
 
   // Game detection
@@ -251,6 +252,33 @@ export default function Dashboard({ navigation }) {
         contentContainerStyle={s.list}
         ListHeaderComponent={
           <>
+            {/* ── Permission Alert ────────────────────────────────────── */}
+            {!hasPermission && (
+              <View style={s.permCard}>
+                <View style={s.permHeader}>
+                  <View style={s.permIcon} />
+                  <Text style={s.permTitle}>Action Required</Text>
+                </View>
+                <Text style={s.permText}>
+                  Android requires "Usage Access" to detect when you are playing games. Please enable it in Settings.
+                </Text>
+                <View style={s.permBtns}>
+                  <TouchableOpacity 
+                    style={s.permBtnSettings} 
+                    onPress={openUsageSettings}
+                    activeOpacity={0.8}>
+                    <Text style={s.permBtnText}>Open Settings</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={s.permBtnCheck} 
+                    onPress={checkPerms}
+                    activeOpacity={0.8}>
+                    <Text style={s.permCheckText}>I've Enabled It</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
             {/* ── Status card ─────────────────────────────────────────── */}
             <View style={[s.statusCard, isPlaying && s.statusCardActive]}>
               <View style={s.statusRow}>
@@ -361,6 +389,42 @@ const s = StyleSheet.create({
   signOutText: { color: C.textPrimary, fontSize: 12, fontWeight: "600" },
 
   list: { paddingHorizontal: S.md, paddingBottom: 60 },
+
+  // Permission card
+  permCard: {
+    backgroundColor: C.dangerSoft,
+    borderRadius: R.xl,
+    borderWidth: 1,
+    borderColor: C.danger + "30",
+    padding: S.lg,
+    marginTop: S.md,
+    gap: S.sm,
+  },
+  permHeader: { flexDirection: "row", alignItems: "center", gap: 10 },
+  permIcon: { width: 14, height: 14, borderRadius: 7, backgroundColor: C.danger },
+  permTitle: { color: C.textPrimary, fontSize: 16, fontWeight: "700", letterSpacing: -0.2 },
+  permText: { color: C.textSecondary, fontSize: 13, lineHeight: 18 },
+  permBtns: { flexDirection: "row", gap: S.sm, marginTop: S.xs },
+  permBtnSettings: {
+    backgroundColor: C.danger,
+    borderRadius: R.md,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  permBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
+  permBtnCheck: {
+    backgroundColor: "transparent",
+    borderRadius: R.md,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  permCheckText: { color: C.textSecondary, fontWeight: "600", fontSize: 13 },
 
   // Status card
   statusCard: {

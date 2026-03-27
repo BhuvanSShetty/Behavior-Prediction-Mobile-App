@@ -79,3 +79,16 @@ export const stopGameDetection = () => {
       .catch(e => console.log("⚠️ Service stop failed", e));
   }
 };
+
+export const hasUsagePermission = async () => {
+  if (UsageStatsModule && UsageStatsModule.checkPermission) {
+    return await UsageStatsModule.checkPermission();
+  }
+  return false;
+};
+
+export const openUsageSettings = () => {
+  if (UsageStatsModule && UsageStatsModule.requestPermission) {
+    UsageStatsModule.requestPermission();
+  }
+};
