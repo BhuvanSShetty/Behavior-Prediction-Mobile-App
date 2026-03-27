@@ -266,7 +266,7 @@ export default function Parent({ navigation }) {
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
+          </>
         )}
 
         {!data && children.length > 0 && (
