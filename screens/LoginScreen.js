@@ -93,6 +93,7 @@ export default function LoginScreen({ navigation }) {
                   style={[s.input, focused === "password" && s.inputFocused]}
                   onFocus={() => setFocused("password")}
                   onBlur={() => setFocused("")}
+                  onSubmitEditing={handleLogin}  // <-- FIX FOR KEYBOARD SUBMIT TRIGGERING
                 />
               </View>
 
@@ -112,7 +113,10 @@ export default function LoginScreen({ navigation }) {
           {/* ── Footer ────────────────────────────────────────────────── */}
           <View style={s.footer}>
             <Text style={s.footerText}>Don't have an account?  </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+            <TouchableOpacity 
+              disabled={loading}
+              onPress={() => navigation.navigate("Register")}
+            >
               <Text style={s.footerLink}>Create account</Text>
             </TouchableOpacity>
           </View>
@@ -177,6 +181,7 @@ const s = StyleSheet.create({
     shadowOpacity: 0.8,
     shadowRadius: 40,
     elevation: 20,
+    zIndex: 50,
   },
   card: {
     backgroundColor: C.card,
@@ -238,11 +243,20 @@ const s = StyleSheet.create({
   },
 
   // Footer
-  footer:     { flexDirection: "row", justifyContent: "center", marginTop: S.xl },
+  footer: { 
+    flexDirection: "row", 
+    justifyContent: "center", 
+    marginTop: 80, 
+    paddingBottom: 40,
+    zIndex: -1,
+    elevation: 0,
+  },
   footerText: { color: C.textSecondary, fontSize: 14 },
   footerLink: {
     color: C.accent,
     fontSize: 14,
     fontWeight: "600",
+    padding: 10,  // increasing hit area for exact targeting
+    marginTop: -10, // balancing padding visually
   },
 });
