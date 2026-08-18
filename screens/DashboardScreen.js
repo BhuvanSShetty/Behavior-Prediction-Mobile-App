@@ -12,6 +12,7 @@ import {
 import {
   startGameDetection,
   stopGameDetection,
+  stopBackgroundService,
   addListener,
   hasUsagePermission,
   openUsageSettings,
@@ -25,6 +26,7 @@ import {
 
 import { logout } from "../services/authService";
 import { C, S, R, stateColor } from "../utils/theme";
+import { fmtElapsed } from "../utils/format";
 
 // ─── State badge ──────────────────────────────────────────────────────────────
 const StateBadge = ({ state }) => {
@@ -67,6 +69,11 @@ export default function Dashboard({ navigation }) {
   const [isPlaying,   setIsPlaying]   = useState(false);
   const [hasPermission, setHasPermission] = useState(true);
 
+  // Auto-detected session (from gameDetector's native-backed loop), distinct
+  // from the manual fallback session above.
+  const [autoSession, setAutoSession] = useState(null); // { packageName, gameName, startTime } | null
+  const [elapsedSec,  setElapsedSec]  = useState(0);
+
   // Load sessions
   const load = async () => {
     try {
@@ -98,8 +105,15 @@ export default function Dashboard({ navigation }) {
     try {
       if (typeof addListener === "function") {
         unsub = addListener({
-          onStart:  () => setIsPlaying(true),
-          onEnd:    () => setIsPlaying(false),
+          onStart: (session) => {
+            setAutoSession(session);
+            setIsPlaying(true);
+          },
+          onEnd: () => {
+            setAutoSession(null);
+            // Only clear "playing" if there's no manual session running.
+            setIsPlaying((prev) => (manualStart ? prev : false));
+          },
           onResult: () => load(),
         });
       }
@@ -110,13 +124,28 @@ export default function Dashboard({ navigation }) {
     }
     return () => {
       if (typeof unsub === "function") unsub();
-      stopGameDetection();
+      stopGameDetection(); // stops the JS sync loop only; native detection keeps running
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // MANUAL START
+  // Live-updating duration for whichever session (auto or manual) is active.
+  useEffect(() => {
+    const activeStart = autoSession?.startTime || manualStart;
+    if (!activeStart) {
+      setElapsedSec(0);
+      return;
+    }
+    const tick = () => setElapsedSec(Math.max(0, Math.floor((Date.now() - activeStart) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [autoSession?.startTime, manualStart]);
+
+  // MANUAL START (fallback -- disabled while an auto-detected session is active
+  // to avoid two overlapping session records for the same play time)
   const startManual = () => {
-    if (manualStart) return;
+    if (manualStart || autoSession) return;
     setManualStart(Date.now());
     setIsPlaying(true);
   };
@@ -150,6 +179,7 @@ export default function Dashboard({ navigation }) {
   // LOGOUT
   const handleLogout = async () => {
     try {
+      await stopBackgroundService();
       await logout();
       navigation.replace("Login");
     } catch (e) {
@@ -165,6 +195,10 @@ export default function Dashboard({ navigation }) {
     const risk  = item?.prediction?.addictionRisk ?? null;
     const state = item?.prediction?.state || "Unknown";
     const dur   = item?.raw?.duration || 0;
+    const startedAt = item?.raw?.start ? new Date(item.raw.start) : null;
+    const dateLabel = startedAt
+      ? `${startedAt.toLocaleDateString(undefined, { day: "2-digit", month: "short" })} · ${startedAt.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`
+      : null;
 
     return (
       <View style={card.wrap}>
@@ -174,6 +208,7 @@ export default function Dashboard({ navigation }) {
           <View style={card.topRow}>
             <View>
               <Text style={card.sessionNum}>Session {sessions.length - index}</Text>
+              {dateLabel && <Text style={card.dateLabel}>{dateLabel}</Text>}
               <Text style={card.duration}>
                 {dur}
                 <Text style={card.durationUnit}> min</Text>
@@ -237,11 +272,25 @@ export default function Dashboard({ navigation }) {
       <View style={s.navbar}>
         <View>
           <Text style={s.navTitle}>Game Activity</Text>
-          <Text style={s.navSub}>Level Devil tracker</Text>
+          <Text style={s.navSub}>Game activity tracker</Text>
         </View>
-        <TouchableOpacity style={s.signOutBtn} onPress={handleLogout} activeOpacity={0.8}>
-          <Text style={s.signOutText}>Sign out</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", gap: S.sm }}>
+          <TouchableOpacity
+            style={s.signOutBtn}
+            onPress={() => navigation.navigate("DebugLog")}
+            activeOpacity={0.8}>
+            <Text style={s.signOutText}>Log</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={s.signOutBtn}
+            onPress={() => navigation.navigate("GameSettings")}
+            activeOpacity={0.8}>
+            <Text style={s.signOutText}>Games</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.signOutBtn} onPress={handleLogout} activeOpacity={0.8}>
+            <Text style={s.signOutText}>Sign out</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -284,24 +333,40 @@ export default function Dashboard({ navigation }) {
               <View style={s.statusRow}>
                 <View style={[s.statusDot, { backgroundColor: isPlaying ? C.success : C.textMuted }]} />
                 <Text style={[s.statusLabel, { color: isPlaying ? C.textPrimary : C.textSecondary }]}>
-                  {isPlaying ? "Session active" : "No active session"}
+                  {autoSession ? "Gaming detected" : isPlaying ? "Session active (manual)" : "No gaming activity"}
                 </Text>
               </View>
+
+              {autoSession && (
+                <Text style={s.detectedGame}>{autoSession.gameName}</Text>
+              )}
+
+              {isPlaying && (
+                <Text style={s.liveDuration}>{fmtElapsed(elapsedSec)}</Text>
+              )}
+
               <Text style={s.statusHint}>
-                {isPlaying
-                  ? "Recording in progress. Stop manually or detection will handle it."
-                  : "Auto-detects Level Devil. You can also start a session manually."}
+                {autoSession
+                  ? `Session started at ${new Date(autoSession.startTime).toLocaleTimeString()}. Ending automatically when you leave the game.`
+                  : isPlaying
+                  ? "Manual session recording in progress."
+                  : "Auto-detects your configured games in the background. You can also start a session manually."}
               </Text>
 
+              {/* Manual start is disabled while an auto-detected session owns the timer */}
               {!isPlaying ? (
-                <TouchableOpacity style={s.startBtn} onPress={startManual} activeOpacity={0.85}>
+                <TouchableOpacity
+                  style={[s.startBtn, autoSession && s.btnDisabled]}
+                  onPress={startManual}
+                  disabled={!!autoSession}
+                  activeOpacity={0.85}>
                   <Text style={s.startBtnText}>Start session</Text>
                 </TouchableOpacity>
-              ) : (
+              ) : manualStart ? (
                 <TouchableOpacity style={s.stopBtn} onPress={stopManual} activeOpacity={0.85}>
                   <Text style={s.stopBtnText}>Stop session</Text>
                 </TouchableOpacity>
-              )}
+              ) : null}
             </View>
 
             <SectionLabel>Recent sessions ({sessions.length})</SectionLabel>
@@ -314,7 +379,7 @@ export default function Dashboard({ navigation }) {
             </View>
             <Text style={s.emptyTitle}>No sessions recorded</Text>
             <Text style={s.emptyBody}>
-              Open Level Devil or tap Start session above to begin tracking.
+              Open a configured game or tap Start session above to begin tracking.
             </Text>
           </View>
         }
@@ -340,6 +405,7 @@ const card = StyleSheet.create({
   rightCol:  { alignItems: "flex-end", gap: 6 },
 
   sessionNum:   { color: C.textMuted, fontSize: 12, fontWeight: "600", marginBottom: 2, textTransform: "uppercase", letterSpacing: 0.5 },
+  dateLabel:    { color: C.textSecondary, fontSize: 12, fontWeight: "500", marginBottom: 4 },
   duration:     { color: C.textPrimary, fontSize: 32, fontWeight: "800", letterSpacing: -1 },
   durationUnit: { fontSize: 16, fontWeight: "500", color: C.textSecondary, letterSpacing: 0 },
   risk:         { fontSize: 12, fontWeight: "600", marginTop: 4 },
@@ -441,6 +507,9 @@ const s = StyleSheet.create({
   statusDot:  { width: 8, height: 8, borderRadius: 4 },
   statusLabel: { fontSize: 16, fontWeight: "700", color: C.textPrimary, letterSpacing: -0.2 },
   statusHint: { color: C.textSecondary, fontSize: 14, lineHeight: 22 }, // Renamed from selectHintText to statusHint as per original context
+  detectedGame: { color: C.textPrimary, fontSize: 20, fontWeight: "800", letterSpacing: -0.3 },
+  liveDuration: { color: C.accent, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
+  btnDisabled: { opacity: 0.4 },
 
   startBtn: {
     backgroundColor: C.accent,
