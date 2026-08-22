@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API = axios.create({
-  baseURL: "https://backend-behavior-pred-depoy.onrender.com/api",
+  baseURL: "https://api.bhuvans.in/api",
   timeout: 10000,
 });
 
